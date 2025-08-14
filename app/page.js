@@ -7,6 +7,7 @@ export default function Home() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true); // To handle loading state
   const [error, setError] = useState(null); // To handle errors
+  const [newPost, setNewPost] = useState({ title: '', content: '' });
 
   const apiUrl = '/api/posts';  // The backend API URL (works both locally and on Vercel)
 
