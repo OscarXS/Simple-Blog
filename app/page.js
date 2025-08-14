@@ -6,41 +6,44 @@ export default function Home() {
   const [posts, setPosts] = useState([])
   const [newPost, setNewPost] = useState({ title: '', content: '' })
 
-  //fetch posts from the backend API
+  // Get the base API URL dynamically based on the environment
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api/posts'; // Default to Next.js API
+
+  // Fetch posts from the backend API
   useEffect(() => {
     const fetchPosts = async () => {
-      const res = await fetch('http://localhost:5000/api/posts')
-      const data = await res.json()
-      setPosts(data)
-    }
-    fetchPosts()
-  }, [])
-  
+      const res = await fetch(apiUrl);
+      const data = await res.json();
+      setPosts(data);
+    };
+    fetchPosts();
+  }, [apiUrl]);
+
   // Handle form submissions
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    if(!newPost.title || !newPost.content) return
-    
-    const res = await fetch('http://localhost:5000/api/posts', {
+    e.preventDefault();
+    if (!newPost.title || !newPost.content) return;
+
+    const res = await fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newPost)
-    })
-    
-    const data = await res.json()
-    setPosts([...posts, data])
-    setNewPost({ title: '', content: '' })
-  }
+      body: JSON.stringify(newPost),
+    });
+
+    const data = await res.json();
+    setPosts([...posts, data]);
+    setNewPost({ title: '', content: '' });
+  };
 
   // Handle delete action
   const handleDelete = async (id) => {
-    const res = await fetch(`http://localhost:5000/api/posts/${id}`, {
-      method: 'DELETE'
-    })
-    if(res.ok) {
-      setPosts(posts.filter(post => post.id !== id))
+    const res = await fetch(`${apiUrl}/${id}`, {
+      method: 'DELETE',
+    });
+    if (res.ok) {
+      setPosts(posts.filter((post) => post.id !== id));
     }
-  }
+  };
   
   return (
     <div>
