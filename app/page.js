@@ -1,15 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+// blog-frontend/pages/index.js
+import { useState, useEffect } from 'react';
 
 export default function Home() {
-  const [posts, setPosts] = useState([])
-  const [newPost, setNewPost] = useState({ title: '', content: '' })
+  const [posts, setPosts] = useState([]);
+  const [newPost, setNewPost] = useState({ title: '', content: '' });
 
-  // Get the base API URL dynamically based on the environment
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api/posts'; // Default to Next.js API
+  const apiUrl = '/api/posts';  // The backend API URL (works both locally and on Vercel)
 
-  // Fetch posts from the backend API
+  // Fetch posts from backend API
   useEffect(() => {
     const fetchPosts = async () => {
       const res = await fetch(apiUrl);
@@ -17,9 +17,9 @@ export default function Home() {
       setPosts(data);
     };
     fetchPosts();
-  }, [apiUrl]);
+  }, []);
 
-  // Handle form submissions
+  // Handle form submission (creating a new post)
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!newPost.title || !newPost.content) return;
@@ -37,37 +37,37 @@ export default function Home() {
 
   // Handle delete action
   const handleDelete = async (id) => {
-    const res = await fetch(`${apiUrl}/${id}`, {
+    const res = await fetch(`${apiUrl}?id=${id}`, {
       method: 'DELETE',
     });
     if (res.ok) {
       setPosts(posts.filter((post) => post.id !== id));
     }
   };
-  
+
   return (
     <div>
-      <h1>Simple Blog</h1>
-
-      <h2>Create a New Post</h2>
+      <h1>Blog</h1>
       <form onSubmit={handleSubmit}>
         <input
-          type='text'
-          placeholder='Title'
+          type="text"
+          placeholder="Title"
           value={newPost.title}
           onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
         />
         <textarea
-          placeholder='Content'
+          placeholder="Content"
           value={newPost.content}
-          onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
-          />
-        <button type='submit'>Create Post</button>
+          onChange={(e) =>
+            setNewPost({ ...newPost, content: e.target.value })
+          }
+        />
+        <button type="submit">Create Post</button>
       </form>
 
-      <h2>All Posts</h2>
+      <h2>Posts</h2>
       <ul>
-        {posts.map(post => (
+        {posts.map((post) => (
           <li key={post.id}>
             <h3>{post.title}</h3>
             <p>{post.content}</p>
@@ -76,5 +76,5 @@ export default function Home() {
         ))}
       </ul>
     </div>
-  )
+  );
 }
