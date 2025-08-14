@@ -1,58 +1,48 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Create the Supabase client
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
+// Initialize Supabase client
+const supabase = createClient('https://ymqckvsyjmifclzgybth.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InltcWNrdnN5am1pZmNsemd5YnRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUxNzM4NTMsImV4cCI6MjA3MDc0OTg1M30.lN1QSGqSjP-wIGg-kiNt4-txzEiFbgYqEPwvPtY2JOc');
 
-export async function handler(req, res) {
-  if (req.method === 'GET') {
-    // Handle GET requests
-    try {
-      const { data, error } = await supabase
-        .from('posts')
-        .select('*')
-        .order('id', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching posts:', error);
-        return res.status(500).json({ error: error.message });
-      }
-
-      return res.status(200).json(data);
-    } catch (error) {
-      console.error('Error:', error);
-      return res.status(500).json({ error: 'Internal Server Error' });
+// Handle GET requests
+export async function GET(req, res) {
+  console.log('GET request received');
+  try {
+    const { data, error } = await supabase.from('posts').select('*');
+    if (error) {
+      console.error('Error fetching posts:', error);
+      return res.status(500).json({ error: error.message });
     }
+    console.log('Fetched posts:', data);
+    res.status(200).json(data);
+  } catch (error) {
+    console.error('Unexpected error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+// Handle POST requests
+export async function POST(req, res) {
+  const { title, content } = req.body;
+  console.log('POST request received with body:', req.body);
+
+  if (!title || !content) {
+    return res.status(400).json({ error: 'Title and content are required' });
   }
 
-  if (req.method === 'POST') {
-    // Handle POST requests
-    try {
-      const { title, content } = req.body;
+  try {
+    const { data, error } = await supabase
+      .from('posts')
+      .insert([{ title, content }]);
 
-      if (!title || !content) {
-        return res.status(400).json({ error: 'Title and content are required' });
-      }
-
-      // Insert a new post into Supabase
-      const { data, error } = await supabase
-        .from('posts')
-        .insert([{ title, content }])
-        .single();  // Ensures only one post is inserted
-
-      if (error) {
-        console.error('Error inserting post:', error);
-        return res.status(500).json({ error: error.message });
-      }
-
-      return res.status(201).json(data);
-    } catch (error) {
-      console.error('Error:', error);
-      return res.status(500).json({ error: 'Internal Server Error' });
+    if (error) {
+      console.error('Error inserting post:', error);
+      return res.status(500).json({ error: error.message });
     }
-  }
 
-  // If method is not GET or POST
-  return res.status(405).json({ error: `Method ${req.method} Not Allowed` });
+    console.log('Inserted post:', data);
+    res.status(201).json(data[0]); // Send the newly created post back
+  } catch (error) {
+    console.error('Unexpected error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 }
